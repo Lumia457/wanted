@@ -33,14 +33,23 @@
 
 <style>
   
+summary {
+    transition: 0.3s; /* 让变化有一个丝滑的过渡效果 */
+}
+  
+/* 当鼠标放到 summary 上时，背景变色 */
+summary:hover {
+    background-color: lightblue;
+}
+
 li {
-    height: 20px;
+    height: 30px;
     transition: 0.3s; /* 让变化有一个丝滑的过渡效果 */
 }
   
 /* 当鼠标放到 li 上时，高度变大，背景变色 */
 li:hover {
-    height: 40px;
+    height: 50px;
     background-color: lightblue;
 }
   
