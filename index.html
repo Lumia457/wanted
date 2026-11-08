@@ -79,7 +79,7 @@ li:hover {
         .search-fixed-bar {
             position: fixed;
             top: 15px;
-            left: 20px;
+            right: 20px;
             background: white;
             padding: 10px 15px;
             border-radius: 25px;
@@ -131,6 +131,21 @@ li:hover {
         }
         h2 { color: #1e293b; margin-top: 40px; border-left: 4px solid #3b82f6; padding-left: 10px; }
         p { color: #334155; font-size: 16px; }
+
+        /* 美化原生的 details 标签 */
+        details {
+            background: #f8fafc;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+        summary {
+            font-weight: bold;
+            color: #334155;
+            cursor: pointer;
+            outline: none;
+        }
   
 </style>
 
@@ -145,27 +160,56 @@ li:hover {
 
     <!-- 被检索的内容区域 -->
     <div class="content-area" id="searchableArea">
-        <h1>前端页面完美检索（修复跳转版）</h1>
-        <p>如果之前遇到了无法跳转的情况，现在请再次测试。只要在右上方输入你要找的词，比如输入“HTML5”或“布局”。</p>
+        <h1>前端页面完美检索（支持折叠内容）</h1>
+        <p>现在，即使文字被藏在折叠标签内部，系统也能把它们搜出来，并且**会自动把折叠区撑开**弹给你看！</p>
         
-        <h2>第一章：关于 HTML5 技术的普及</h2>
-        <p>HTML5 不仅仅是 HTML 的下一代，更是前端技术演进的一个里程碑。它引入了更多的语义化标签、多媒体支持以及更强大的 API。</p>
-        <p>现在直接点击“查找下一个”，页面应该会像丝般顺滑地进行滚动跳转。</p>
+        <h2>第一章：普通正文</h2>
+        <p>普通的 HTML5 文本会直接变黄并定位。</p>
 
-        <h2>第二章：CSS3 布局与美化</h2>
-        <p>CSS3 带来了弹性盒子（Flexbox）和网格布局（Grid），这使得我们在做响应式开发和元素居中时变得无比简单。不再需要为了改一个 <li> 的高度而大费周章。</p>
+        <h2>第二章：测试折叠区域</h2>
+        
+        <!-- 测试折叠框 1 -->
+        <details>
+            <summary>点击展开：查看关于 CSS3 的隐藏技巧</summary>
+            <p>这是一个隐藏起来的秘密内容。在这里藏着关键字：**弹性盒子布局**。</p>
+            <p>当你如果在右上角搜索“弹性盒子”，这个折叠框原本是关着的，但系统会自动把它变成打开状态并定位！</p>
+        </details>
 
-        <h2>第三章：核心 JavaScript 与浏览器内置能力</h2>
-        <p>利用全新的 CSS Custom Highlight API，可以做到非常丝滑的全局全量检索。无论是大型应用还是简单的前端页面，高亮检索都能极大地提升用户体验。</p>
+        <!-- 测试折叠框 2 -->
+        <details>
+            <summary>点击展开：查看关于 JavaScript 的隐藏秘密</summary>
+            <p>在这里我们藏着另外一个高级框架技术：**Vue和React组件化**。</p>
+            <p>试着输入“组件化”进行测试。</p>
+        </details>
     </div>
 
-    <!-- 核心修复逻辑 -->
+    <!-- 核心逻辑 JavaScript -->
     <script>
         const searchInput = document.getElementById('combinedSearchInput');
         const nextBtn = document.getElementById('nextSearchBtn');
         const searchableArea = document.getElementById('searchableArea');
 
         let lastQuery = "";
+
+        // 【新增辅助函数】核心：检查隐藏内容，如果命中关键字，自动强制撑开 <details>
+        function autoExpandDetails(query) {
+            if (!query) return;
+            
+            // 拿到页面上所有的 details 标签
+            const allDetails = searchableArea.querySelectorAll('details');
+            
+            allDetails.forEach(details => {
+                // 拿到该折叠框内排除 <summary> 之外的所有正文文本
+                const contentText = details.textContent.toLowerCase();
+                
+                // 如果关着的折叠框里包含了用户搜索的字
+                if (contentText.includes(query)) {
+                    if (!details.hasAttribute('open')) {
+                        details.setAttribute('open', ''); // 强制给它加上 open 属性使其展开
+                    }
+                }
+            });
+        }
 
         // 功能一：一键让文本区内所有关键字永久变黄
         function applyAllHighlights() {
@@ -176,6 +220,9 @@ li:hover {
                 lastQuery = "";
                 return;
             }
+
+            // 1. 【核心联动点】在着色和查找前，先执行自动展开
+            autoExpandDetails(query);
 
             if (query === lastQuery) return;
             lastQuery = query;
@@ -207,13 +254,15 @@ li:hover {
             }
         }
 
-        // 功能二：查找下一个并安全滚动（移除了会打断焦点的代码）
+        // 功能二：查找下一个并安全滚动
         function scrollToNext() {
             const query = searchInput.value.trim();
             if (!query) return;
 
-            // 调用最稳妥的底层查找指令
-            // 第4个参数设为 true 保证到底部能自动循环回到顶部
+            // 先确保所有黄色高亮和自动展开已经运行
+            applyAllHighlights();
+
+            // 执行跳转
             const found = window.find(query, false, false, true, false, false, false);
             
             if (!found) {
@@ -221,19 +270,15 @@ li:hover {
             }
         }
 
-        // 监听事件 1：输入字时实时染黄
+        // 监听事件
         searchInput.addEventListener('input', applyAllHighlights);
-
-        // 监听事件 2：点击按钮跳转下一个
         nextBtn.addEventListener('click', function(e) {
             e.preventDefault();
             scrollToNext();
         });
-
-        // 监听事件 3：敲回车跳转下一个
         searchInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                e.preventDefault(); // 阻止浏览器表单默认回车行为
+                e.preventDefault();
                 scrollToNext();
             }
         });
