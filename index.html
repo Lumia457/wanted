@@ -32,10 +32,16 @@
 </nav>
 
 <style>
-
-/* 选中页面上所有的 <li> 标签 */
+  
 li {
-    height: 20px;
+    height: 40px;
+    transition: 0.3s; /* 让变化有一个丝滑的过渡效果 */
+}
+  
+/* 当鼠标放到 li 上时，高度变大，背景变色 */
+li:hover {
+    height: 60px;
+    background-color: lightblue;
 }
   
 .sidebar {
