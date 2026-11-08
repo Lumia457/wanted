@@ -1,0 +1,44 @@
+<nav class="sidebar">
+  <details>
+    <summary>仪表盘</summary>
+    <ul>
+      <li><a href="/dashboard">概览</a></li>
+      <li><a href="/stats">数据统计</a></li>
+    </ul>
+  </details>
+  <details>
+    <summary>用户管理</summary>
+    <ul>
+      <li><a href="/users">用户列表</a></li>
+      <li><a href="/roles">权限设置</a></li>
+    </ul>
+  </details>
+  <details>
+    <summary>系统设置</summary>
+    <ul>
+      <li><a href="/basic">基本设置</a></li>
+      <li><a href="/notifications">通知设置</a></li>
+    </ul>
+  </details>
+</nav>
+
+<style>
+.sidebar {
+  width: 200px;
+  border: 1px solid #eee;
+  padding: 10px;
+}
+
+.sidebar summary {
+  padding: 8px 10px;
+}
+
+.sidebar ul {
+  margin: 5px 0 10px 20px;
+}
+
+.sidebar a {
+  color: #3498db;
+  text-decoration: none;
+}
+</style>
