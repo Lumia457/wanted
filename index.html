@@ -118,7 +118,7 @@ li:hover {
 
         /* 内容区域 */
         .content-area {
-            max-width: 800px;
+            max-width: 1880px;
             margin: 80px auto 0 auto;
             background: white;
             padding: 40px;
@@ -154,33 +154,6 @@ li:hover {
     <div class="search-fixed-bar">
         <input type="text" id="combinedSearchInput" placeholder="输入关键字搜索..." autocomplete="off">
         <button id="nextSearchBtn">查找下一个</button>
-    </div>
-
-    <!-- 被检索的内容区域 -->
-    <div class="content-area" id="searchableArea">
-        <h1>多重折叠穿透检索测试</h1>
-        <p>下方是一个三层深度嵌套的折叠区域。你可以试着搜索最里面的关键字，系统会把<b>三层大门同时为你打开</b>并直接定位到最底层！</p>
-        
-        <!-- 【测试点】多重嵌套折叠开始 -->
-        <details>
-            <summary>📂 第一层：前端开发大类（默认关闭）</summary>
-            <p>这里是第一层的一些基础说明。我们继续往下看：</p>
-
-            <!-- 第二层 -->
-            <details>
-                <summary>📂 第二层：JavaScript 高级框架（默认关闭）</summary>
-                <p>这里是第二层。在下面藏着具体的框架细节：</p>
-
-                <!-- 第三层 -->
-                <details>
-                    <summary>📄 第三层：Vue3 核心原理解析（默认关闭）</summary>
-                    <p>你终于找到我了！这里藏着终极密码关键字：<b>【响应式数据代理】</b>。</p>
-                    <p>试着在右上角输入“数据代理”或者“响应式”，看看这三层折叠框是不是同时被啪啪啪全部撑开了？</p>
-                </details>
-
-            </details>
-        </details>
-        <!-- 多重嵌套折叠结束 -->
     </div>
 
     <!-- 核心穿透逻辑 JavaScript -->
