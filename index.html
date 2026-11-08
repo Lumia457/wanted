@@ -79,7 +79,7 @@ li:hover {
         .search-fixed-bar {
             position: fixed;
             top: 15px;
-            left: 20px;
+            right: 20px;
             background: white;
             padding: 10px 15px;
             border-radius: 25px;
@@ -110,10 +110,6 @@ li:hover {
             font-weight: bold;
         }
 
-        .search-fixed-bar button:hover {
-            background-color: #2563eb;
-        }
-
         /* 永久黄色高亮样式 */
         ::highlight(search-results) {
             background-color: #fff3cd;
@@ -129,16 +125,18 @@ li:hover {
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
-        h2 { color: #1e293b; margin-top: 40px; border-left: 4px solid #3b82f6; padding-left: 10px; }
-        p { color: #334155; font-size: 16px; }
 
-        /* 美化原生的 details 标签 */
+        /* 美化原生的 details 标签并加上层级缩进 */
         details {
             background: #f8fafc;
             padding: 12px;
-            margin: 15px 0;
+            margin: 10px 0;
             border-radius: 6px;
             border: 1px solid #e2e8f0;
+        }
+        details details {
+            margin-left: 20px; /* 子折叠框向右缩进，突出层级 */
+            background: #ffffff;
         }
         summary {
             font-weight: bold;
@@ -160,30 +158,32 @@ li:hover {
 
     <!-- 被检索的内容区域 -->
     <div class="content-area" id="searchableArea">
-        <h1>前端页面完美检索（支持折叠内容）</h1>
-        <p>现在，即使文字被藏在折叠标签内部，系统也能把它们搜出来，并且**会自动把折叠区撑开**弹给你看！</p>
+        <h1>多重折叠穿透检索测试</h1>
+        <p>下方是一个三层深度嵌套的折叠区域。你可以试着搜索最里面的关键字，系统会把<b>三层大门同时为你打开</b>并直接定位到最底层！</p>
         
-        <h2>第一章：普通正文</h2>
-        <p>普通的 HTML5 文本会直接变黄并定位。</p>
-
-        <h2>第二章：测试折叠区域</h2>
-        
-        <!-- 测试折叠框 1 -->
+        <!-- 【测试点】多重嵌套折叠开始 -->
         <details>
-            <summary>点击展开：查看关于 CSS3 的隐藏技巧</summary>
-            <p>这是一个隐藏起来的秘密内容。在这里藏着关键字：**弹性盒子布局**。</p>
-            <p>当你如果在右上角搜索“弹性盒子”，这个折叠框原本是关着的，但系统会自动把它变成打开状态并定位！</p>
-        </details>
+            <summary>📂 第一层：前端开发大类（默认关闭）</summary>
+            <p>这里是第一层的一些基础说明。我们继续往下看：</p>
 
-        <!-- 测试折叠框 2 -->
-        <details>
-            <summary>点击展开：查看关于 JavaScript 的隐藏秘密</summary>
-            <p>在这里我们藏着另外一个高级框架技术：**Vue和React组件化**。</p>
-            <p>试着输入“组件化”进行测试。</p>
+            <!-- 第二层 -->
+            <details>
+                <summary>📂 第二层：JavaScript 高级框架（默认关闭）</summary>
+                <p>这里是第二层。在下面藏着具体的框架细节：</p>
+
+                <!-- 第三层 -->
+                <details>
+                    <summary>📄 第三层：Vue3 核心原理解析（默认关闭）</summary>
+                    <p>你终于找到我了！这里藏着终极密码关键字：<b>【响应式数据代理】</b>。</p>
+                    <p>试着在右上角输入“数据代理”或者“响应式”，看看这三层折叠框是不是同时被啪啪啪全部撑开了？</p>
+                </details>
+
+            </details>
         </details>
+        <!-- 多重嵌套折叠结束 -->
     </div>
 
-    <!-- 核心逻辑 JavaScript -->
+    <!-- 核心穿透逻辑 JavaScript -->
     <script>
         const searchInput = document.getElementById('combinedSearchInput');
         const nextBtn = document.getElementById('nextSearchBtn');
@@ -191,24 +191,43 @@ li:hover {
 
         let lastQuery = "";
 
-        // 【新增辅助函数】核心：检查隐藏内容，如果命中关键字，自动强制撑开 <details>
-        function autoExpandDetails(query) {
+        // 【重构核心：多重嵌套穿透函数】
+        function autoExpandNestedDetails(query) {
             if (!query) return;
-            
-            // 拿到页面上所有的 details 标签
-            const allDetails = searchableArea.querySelectorAll('details');
-            
-            allDetails.forEach(details => {
-                // 拿到该折叠框内排除 <summary> 之外的所有正文文本
-                const contentText = details.textContent.toLowerCase();
+
+            // 1. 利用 TreeWalker 扫描文本节点（和高亮池的扫描保持同步）
+            const treeWalker = document.createTreeWalker(searchableArea, NodeFilter.SHOW_TEXT);
+            let currentNode = treeWalker.nextNode();
+
+            while (currentNode) {
+                const text = currentNode.nodeValue.toLowerCase();
                 
-                // 如果关着的折叠框里包含了用户搜索的字
-                if (contentText.includes(query)) {
-                    if (!details.hasAttribute('open')) {
-                        details.setAttribute('open', ''); // 强制给它加上 open 属性使其展开
+                // 2. 如果当前的这行文本里包含了关键字
+                if (text.includes(query)) {
+                    // 3. 【核心逆向追溯机制】
+                    // 拿到当前文字节点的父级 HTML 标签
+                    let parentElement = currentNode.parentElement;
+                    
+                    // 只要往上能找到 <details> 标签，就一直往上找
+                    while (parentElement) {
+                        // 使用 closest 向上寻找最近的 details
+                        const nearestDetails = parentElement.closest('details');
+                        
+                        if (nearestDetails) {
+                            // 如果找到了，并且它还是关着的，立刻强制拔开
+                            if (!nearestDetails.hasAttribute('open')) {
+                                nearestDetails.setAttribute('open', '');
+                            }
+                            // 将指针移动到这个 details 的父级，继续往更高层爷爷级、祖先级追溯
+                            parentElement = nearestDetails.parentElement;
+                        } else {
+                            // 找不到更多的 details 了，说明已经追溯到了最顶层正文，退出内层循环
+                            break;
+                        }
                     }
                 }
-            });
+                currentNode = treeWalker.nextNode();
+            }
         }
 
         // 功能一：一键让文本区内所有关键字永久变黄
@@ -221,8 +240,8 @@ li:hover {
                 return;
             }
 
-            // 1. 【核心联动点】在着色和查找前，先执行自动展开
-            autoExpandDetails(query);
+            // 1. 优先调用“多重嵌套穿透展开函数”
+            autoExpandNestedDetails(query);
 
             if (query === lastQuery) return;
             lastQuery = query;
@@ -259,12 +278,9 @@ li:hover {
             const query = searchInput.value.trim();
             if (!query) return;
 
-            // 先确保所有黄色高亮和自动展开已经运行
             applyAllHighlights();
 
-            // 执行跳转
             const found = window.find(query, false, false, true, false, false, false);
-            
             if (!found) {
                 alert("没有找到更多相关内容 🔍");
             }
@@ -272,10 +288,7 @@ li:hover {
 
         // 监听事件
         searchInput.addEventListener('input', applyAllHighlights);
-        nextBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            scrollToNext();
-        });
+        nextBtn.addEventListener('click', function(e) { e.preventDefault(); scrollToNext(); });
         searchInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
