@@ -69,7 +69,7 @@ li:hover {
 }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             padding: 20px;
             line-height: 1.8;
             background-color: #f5f7fa;
@@ -108,20 +108,19 @@ li:hover {
             cursor: pointer;
             font-size: 14px;
             font-weight: bold;
-            transition: background 0.2s;
         }
 
         .search-fixed-bar button:hover {
             background-color: #2563eb;
         }
 
-        /* 定义匹配项的永久黄色高亮样式 */
+        /* 永久黄色高亮样式 */
         ::highlight(search-results) {
             background-color: #fff3cd;
             color: #856404;
         }
 
-        /* 内容测试区域 */
+        /* 内容区域 */
         .content-area {
             max-width: 800px;
             margin: 80px auto 0 auto;
@@ -138,21 +137,20 @@ li:hover {
     <meta charset="UTF-8">
     <title>全量高亮与滚动定位搜索框</title>
     
-    <!-- 1. 搜索控制栏 -->
+    <!-- 搜索控制栏 -->
     <div class="search-fixed-bar">
-        <!-- 加上 id，并确保其文本不参与正文检索 -->
         <input type="text" id="combinedSearchInput" placeholder="输入关键字搜索..." autocomplete="off">
         <button id="nextSearchBtn">查找下一个</button>
     </div>
 
-    <!-- 2. 被检索的内容区域（只有这个区域内的文本会被查找） -->
+    <!-- 被检索的内容区域 -->
     <div class="content-area" id="searchableArea">
-        <h1>前端页面完美检索系统（已过滤搜索框）</h1>
-        <p>现在，即使你在搜索框里输入“搜索”或者“关键字”，检索系统也只会定位到下方正文里的词，**绝对不会再选中搜索框本身了**！</p>
+        <h1>前端页面完美检索（修复跳转版）</h1>
+        <p>如果之前遇到了无法跳转的情况，现在请再次测试。只要在右上方输入你要找的词，比如输入“HTML5”或“布局”。</p>
         
         <h2>第一章：关于 HTML5 技术的普及</h2>
         <p>HTML5 不仅仅是 HTML 的下一代，更是前端技术演进的一个里程碑。它引入了更多的语义化标签、多媒体支持以及更强大的 API。</p>
-        <p>请尝试在输入框中输入“输入”或者“搜索”进行测试。</p>
+        <p>现在直接点击“查找下一个”，页面应该会像丝般顺滑地进行滚动跳转。</p>
 
         <h2>第二章：CSS3 布局与美化</h2>
         <p>CSS3 带来了弹性盒子（Flexbox）和网格布局（Grid），这使得我们在做响应式开发和元素居中时变得无比简单。不再需要为了改一个 <li> 的高度而大费周章。</p>
@@ -161,7 +159,7 @@ li:hover {
         <p>利用全新的 CSS Custom Highlight API，可以做到非常丝滑的全局全量检索。无论是大型应用还是简单的前端页面，高亮检索都能极大地提升用户体验。</p>
     </div>
 
-    <!-- 3. 核心合并逻辑 JavaScript -->
+    <!-- 核心修复逻辑 -->
     <script>
         const searchInput = document.getElementById('combinedSearchInput');
         const nextBtn = document.getElementById('nextSearchBtn');
@@ -169,7 +167,7 @@ li:hover {
 
         let lastQuery = "";
 
-        // 功能一：全局所有匹配项永久变黄（仅限 searchableArea 区域内）
+        // 功能一：一键让文本区内所有关键字永久变黄
         function applyAllHighlights() {
             const query = searchInput.value.trim().toLowerCase();
             
@@ -184,7 +182,6 @@ li:hover {
 
             CSS.highlights.clear();
 
-            // 限制 TreeWalker 的根节点为 searchableArea，这样搜索框的文本绝不会被渲染高亮
             const treeWalker = document.createTreeWalker(searchableArea, NodeFilter.SHOW_TEXT);
             const ranges = [];
             let currentNode = treeWalker.nextNode();
@@ -210,37 +207,33 @@ li:hover {
             }
         }
 
-        // 功能二：查找下一个并自动滚动定位（核心改良点：防止点中搜索框）
+        // 功能二：查找下一个并安全滚动（移除了会打断焦点的代码）
         function scrollToNext() {
             const query = searchInput.value.trim();
             if (!query) return;
 
-            // 1. 确保高亮已应用
-            applyAllHighlights();
-
-            // 2. 【核心改良点】在调用 window.find 之前，让输入框暂时失去焦点（blur）
-            // 这样浏览器的底层查找机制就会知道“现在不要去搜输入框里的文本”
-            searchInput.blur();
-
-            // 3. 执行查找定位
+            // 调用最稳妥的底层查找指令
+            // 第4个参数设为 true 保证到底部能自动循环回到顶部
             const found = window.find(query, false, false, true, false, false, false);
-            
-            // 4. 查找完毕后，立刻把焦点还给输入框，这样用户可以继续连着打字或敲回车
-            searchInput.focus();
             
             if (!found) {
                 alert("没有找到更多相关内容 🔍");
             }
         }
 
-        // 监听事件
-        nextBtn.addEventListener('click', scrollToNext);
+        // 监听事件 1：输入字时实时染黄
         searchInput.addEventListener('input', applyAllHighlights);
 
-        // 敲回车时同样调用改良后的滚动函数
+        // 监听事件 2：点击按钮跳转下一个
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            scrollToNext();
+        });
+
+        // 监听事件 3：敲回车跳转下一个
         searchInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                e.preventDefault(); // 阻止默认的回车行为
+                e.preventDefault(); // 阻止浏览器表单默认回车行为
                 scrollToNext();
             }
         });
