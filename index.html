@@ -554,8 +554,8 @@ html, body {
 			this.flipSpeed = Math.random() * 0.03 + 0.01; // 自旋速度
 
 			// ✨【核心新增：随机生成绿叶】
-			// 约有 30% 的概率产生新绿色嫩叶，70% 保持粉红樱花
-			this.isLeaf = Math.random() < 0.3; 
+			// 约有 50% 的概率产生新绿色嫩叶，50% 保持粉红樱花
+			this.isLeaf = Math.random() < 0.5; 
 			
 			if (this.isLeaf) {
 				// 典雅的莫兰迪新绿色（带有半透明）
