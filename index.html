@@ -287,4 +287,25 @@ p:hover {
                 scrollToNext();
             }
         });
+
+// 解决折叠收起时页面内容自动上移、晃动的问题
+document.querySelectorAll('details').forEach(details => {
+    // 监听折叠标签的点击事件
+    details.addEventListener('click', function(e) {
+        // 只有当它是“准备收起”（当前是 open 状态，即将变为关闭）时才需要处理
+        if (this.hasAttribute('open')) {
+            // 1. 记录下用户点击这一瞬间，网页滚动条的精确高度
+            const currentScrollTop = window.scrollY || document.documentElement.scrollTop;
+            
+            // 2. 利用 requestAnimationFrame 在浏览器渲染刷新后的下一帧，强行把滚动条焊死在原位
+            requestAnimationFrame(() => {
+                window.scrollTo({
+                    top: currentScrollTop,
+                    behavior: 'auto' // 使用 'auto' 瞬间恢复，防止产生回弹动画
+                });
+            });
+        }
+    });
+});
+
     </script>
