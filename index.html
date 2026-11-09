@@ -169,6 +169,28 @@ p:hover {
             cursor: pointer;
             outline: none;
         }
+    
+/* 开启现代浏览器的尺寸渐变插值（关键：允许从 auto 高度平滑过渡） */
+html {
+    interpolate-size: allow-keywords;
+}
+
+/* 给折叠框内容加入高度渐变和淡入淡出动画 */
+details {
+    overflow: hidden; /* 防止动画期间内容溢出 */
+}
+
+details::details-content {
+    transition: block-size 0.3s ease-out, opacity 0.3s ease-out;
+    block-size: 0;
+    opacity: 0;
+}
+
+details[open]::details-content {
+    block-size: auto;
+    opacity: 1;
+}
+
 </style>
 
     <meta charset="UTF-8">
@@ -287,24 +309,45 @@ p:hover {
             }
         });
 
-// 解决折叠收起时页面内容自动上移、晃动的问题
+// 终极防跑偏：完美平滑折叠组件
 document.querySelectorAll('details').forEach(details => {
-    // 监听折叠标签的点击事件
     details.addEventListener('click', function(e) {
-        // 只有当它是“准备收起”（当前是 open 状态，即将变为关闭）时才需要处理
+        // 我们只处理“收起（从打开变关闭）”的动作
         if (this.hasAttribute('open')) {
-            // 1. 记录下用户点击这一瞬间，网页滚动条的精确高度
-            const currentScrollTop = window.scrollY || document.documentElement.scrollTop;
+            // 1. 阻止原生的瞬间关闭行为，改用我们的动画处理
+            e.preventDefault(); 
             
-            // 2. 利用 requestAnimationFrame 在浏览器渲染刷新后的下一帧，强行把滚动条焊死在原位
-            requestAnimationFrame(() => {
-                window.scrollTo({
-                    top: currentScrollTop,
-                    behavior: 'auto' // 使用 'auto' 瞬间恢复，防止产生回弹动画
-                });
-            });
+            // 2. 记录点击瞬间，该折叠框距离屏幕顶部的相对距离（绝对视觉锚点）
+            const rect = this.getBoundingClientRect();
+            const offsetFromViewportTop = rect.top;
+
+            // 3. 移除 open 属性触发 CSS 退场动画
+            this.removeAttribute('open');
+
+            // 4. 在动画进行的 300 毫秒内，高频将该标签锁死在用户眼前的相对位置
+            const animationDuration = 300; 
+            const startTime = performance.now();
+
+            function lockPosition(currentTime) {
+                const elapsed = currentTime - startTime;
+                
+                // 根据记录的相对距离，反向计算并强行滚动网页，让它在屏幕上的位置一动不动
+                const currentRect = details.getBoundingClientRect();
+                const diff = currentRect.top - offsetFromViewportTop;
+                
+                if (diff !== 0) {
+                    window.scrollBy(0, diff);
+                }
+
+                // 在 300ms 动画结束前，持续锁死
+                if (elapsed < animationDuration) {
+                    requestAnimationFrame(lockPosition);
+                }
+            }
+
+            requestAnimationFrame(lockPosition);
         }
     });
 });
 
-    </script>
+</script>
