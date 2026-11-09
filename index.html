@@ -92,7 +92,7 @@ p:hover {
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            /*padding: 10px;*/
+            padding: 10px;
             line-height: 1.8;
             background-color: #f5f7fa;
         }
@@ -143,8 +143,9 @@ p:hover {
 
         /* 内容区域 */
         .content-area {
-            max-width: 1920px;
-            margin: -40px auto -10px auto;
+            max-width: 1900px;
+            margin: -40px 0px auto;
+            margin-bottom: 500px;
             background: white;
             padding: 10px;
             border-radius: 12px;
@@ -169,44 +170,7 @@ p:hover {
             cursor: pointer;
             outline: none;
         }
-
-
-/* 搜索框吸顶样式保持原样 */
-.search-fixed-bar {
-    position: sticky;
-    top: 0;
-    z-index: 9999; 
-    background: white; 
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 12px 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border: 2px solid #3b82f6;
-    border-radius: 25px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
-}
-
-
-/* 确保浏览器自带的全局外边距被清空，否则屏幕最左最右依然会有一条无法填满的几像素灰边 */
-html, body {
-    margin: 0;
-    padding: 0;
-    background-color: #f5f7fa; /* 网页总底色 */
-}
-
-/* 1. 最外层的内容大框：彻底打破 800px 限制，100% 铺满屏幕左右所有空隙 */
-.content-area {
-    width: 100%; 
-    background: white; /* 核心：让这个大框的白色背景横向无限延伸 */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    
-    padding: 40px 0; /* 上下留出精致的内边距，左右设为 0 */
-}
-
 </style>
-
 
     <meta charset="UTF-8">
     <title>长期求物（可搜索）</title>
@@ -323,6 +287,4 @@ html, body {
                 scrollToNext();
             }
         });
-
-      
     </script>
