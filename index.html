@@ -375,7 +375,130 @@ html, body {
   background-color: white; /* 网页总底色 */
 }
 
+	
+/* 1. 全局底色与字体清零 */
+html, body {
+    margin: 0;
+    padding: 0;
+    /* 换成带有淡淡绿意、看起来很温润的背景底色 */
+    background-color: #f4f7f4; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* 2. 外层通栏：横向 100% 填满左边右边空隙，负责吸顶 */
+.search-fixed-bar {
+    position: sticky;
+    top: 0;
+    z-index: 9999; 
+    width: 100%; 
+    background-color: #ffffff; /* 保持纯白底，衬托绿线 */
     
+    /* 改为典雅的植物绿底部边框线 */
+    border-bottom: 2px solid #8fbc8f; 
+    box-shadow: 0 4px 20px rgba(143, 188, 143, 0.15); /* 淡淡的绿意阴影 */
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 0;
+}
+
+/* 内层控制盒：限制内部输入框和按钮的总宽度为 600px 并在长页面中居中 */
+.search-inner-box {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+    padding: 0 20px;
+}
+
+/* 输入框：自动撑满内层剩余空间 */
+.search-fixed-bar input {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    font-size: 15px;
+    outline: none;
+    background: transparent;
+}
+
+/* 3. 搜索按钮样式：换成典雅绿胶囊按钮 */
+.search-fixed-bar button {
+    padding: 10px 24px;
+    background-color: #8fbc8f; /* 鼠尾草绿 */
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background 0.2s ease;
+}
+
+/* 按钮鼠标悬停效果：变深一点的橄榄绿 */
+.search-fixed-bar button:hover {
+    background-color: #6b8e23;
+}
+
+/* 4. 核心：定义搜索匹配项的【永久绿色高亮】样式（代替刺眼的明黄色） */
+::highlight(search-results) {
+    background-color: #e2ece2; /* 莫兰迪浅绿底色 */
+    color: #2d4a2d;            /* 优雅的深绿文字 */
+}
+
+/* 5. 最外层的内容大框：彻底打破限制，100% 铺满屏幕左右 */
+.content-area {
+    width: 100%; 
+    background: #ffffff; /* 主正文保持纯白，干净圣洁 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    padding: 40px 0; 
+}
+
+/* 内容区内部的所有直接子元素：统一限制在 600px 黄金宽度内 */
+.content-area > h1,
+.content-area > h2,
+.content-area > h3,
+.content-area > p,
+.content-area > details {
+    width: 100%;
+    max-width: 600px; 
+    box-sizing: border-box;
+}
+
+/* 标题美化：加上左侧绿色的精致小边框 */
+h2 {
+    color: #2d4a2d; 
+    margin-top: 40px; 
+    border-left: 4px solid #8fbc8f; 
+    padding-left: 10px;
+}
+
+/* 6. 美化原生的 details 标签：改成清新舒适的淡绿底色 */
+details {
+    background: #f4f7f4; /* 极淡茶绿背景 */
+    padding: 14px;
+    margin: 12px 0;
+    border-radius: 8px;
+    border: 1px solid #e2ece2; /* 淡淡的绿框 */
+}
+
+details details {
+    margin-left: 20px; 
+    background: #ffffff; /* 嵌套里面的折叠框换成纯白，拉开层次感 */
+    border: 1px solid #f4f7f4;
+}
+
+summary {
+    font-weight: bold;
+    color: #3b523b; /* 深绿灰文字 */
+    cursor: pointer;
+    outline: none;
+}
+
+	
 </style>
 
 
