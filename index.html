@@ -229,6 +229,53 @@ details[open]::details-content {
     opacity: 1;
 }
 
+    
+/* 确保浏览器自带的全局外边距被清空，否则屏幕最左最右依然会有一条无法填满的几像素灰边 */
+html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #f5f7fa; /* 网页总底色 */
+}
+
+/* 1. 最外层的内容大框：彻底打破 800px 限制，100% 铺满屏幕左右所有空隙 */
+.content-area {
+    width: 100%; 
+    background: white; /* 核心：让这个大框的白色背景横向无限延伸 */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    
+    /* 内部布局：让里面的所有子元素（如 h1, p, details）在中央聚拢居中 */
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    
+    padding: 40px 0; /* 上下留出精致的内边距，左右设为 0 */
+}
+
+/* 2. 【核心新增】内容区内部的所有直接子元素：统一限制在 600px 黄金宽度内 */
+.content-area > h1,
+.content-area > h2,
+.content-area > h3,
+.content-area > p,
+.content-area > details {
+    width: 100%;
+    max-width: 600px; /* 核心：在这里将内容限制在你要求的 600px */
+    box-sizing: border-box; /* 防止 padding 撑破 600px */
+}
+
+/* 3. 针对多重嵌套的 details 内部微调：确保里层的折叠框撑满它能用的空间 */
+.content-area details details {
+    width: auto; /* 让嵌套在内部的子折叠框自适应缩进，不要强行死锁 600px */
+    max-width: 100%;
+}
+
+/* 4. 如果段落文字在缩到 600px 后在手机上太贴边，可以加个安全的左右小间距 */
+@media (max-width: 640px) {
+    .content-area > h1, .content-area > h2, .content-area > p, .content-area > details {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}
+
 </style>
 
     <meta charset="UTF-8">
