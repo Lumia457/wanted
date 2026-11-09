@@ -247,6 +247,7 @@
     
 </canvas></nav>
 
+
 <style>
   
 .sidebar {
@@ -373,6 +374,25 @@ html, body {
   margin: 0;
   padding: 0;
   background-color: white; /* 网页总底色 */
+}
+
+
+/* 1. 确保全局 html 和 body 允许画布在背后铺满 */
+html, body {
+    position: relative;
+    min-height: 100%;
+}
+
+/* 2. 落花画布核心样式：满屏固定，置于最底层，不干扰任何鼠标点击事件 */
+#blossom-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;          /* 确保在所有文字、搜索框和 details 的最底层 */
+    pointer-events: none; /* 让鼠标点击穿透画布，绝对不影响你原有的点击折叠操作 */
+    background: transparent; /* 保持透明，露出你原本优雅的绿色底色 */
 }
 
 
