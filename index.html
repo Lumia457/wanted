@@ -170,16 +170,6 @@ p:hover {
             outline: none;
         }
 
-    
-/* 开启现代浏览器的尺寸渐变插值（关键：允许从 auto 高度平滑过渡） */
-html {
-    interpolate-size: allow-keywords;
-}
-
-html, body {
-    /* 确保不要被其他地方的 smooth 动画干扰 */
-    scroll-behavior: auto !important; 
-}
 
 /* 搜索框吸顶样式保持原样 */
 .search-fixed-bar {
@@ -215,27 +205,8 @@ html, body {
     padding: 40px 0; /* 上下留出精致的内边距，左右设为 0 */
 }
 
-
-#searchableArea {
-    box-sizing: border-box;
-    /* 初始化时也用 CSS 直接将其转为块级锁死环境 */
-    overflow: hidden; 
-}
-
-details {
-    overflow: hidden; 
-}
-
-/* 仅保留极其轻量的淡入淡出（不影响物理高度计算），去除任何对高度尺寸（block-size/height）的渐变干扰 */
-details::details-content {
-    transition: opacity 0.15s ease-out;
-    opacity: 0;
-}
-details[open]::details-content {
-    opacity: 1;
-}
-
 </style>
+
 
     <meta charset="UTF-8">
     <title>长期求物（可搜索）</title>
@@ -353,47 +324,5 @@ details[open]::details-content {
             }
         });
 
-
-// 终极绝杀全焊死技术：永远使用绝对像素，彻底消灭 auto 切换带来的二次跳动
-document.querySelectorAll('details summary').forEach(summary => {
-    summary.addEventListener('click', function(e) {
-        // 1. 核心：切断事件冒泡，里层折叠绝对不会误伤外层
-        e.stopPropagation(); 
-        
-        // 2. 阻止浏览器的所有原生瞬间塌陷/暴力撑开行为，完全由我们用数字接管
-        e.preventDefault(); 
-
-        const details = this.parentElement;
-        const searchableArea = document.getElementById('searchableArea');
-
-        // 3. 执行状态切换（如果开着就关，如果关着就开）
-        if (details.hasAttribute('open')) {
-            details.removeAttribute('open');
-        } else {
-            details.setAttribute('open', '');
-        }
-
-        // 4. 【高精核心】瞬间将外层大容器的高宽临时解除，让浏览器在内存中飞速计算出切换完成后的“最终完美总高度”
-        searchableArea.style.height = 'auto';
-
-        // 5. 瞬间抓取这个最新、最精确、不带任何水分的纯物理总高度（单位：像素）
-        const perfectFinalHeight = searchableArea.offsetHeight;
-
-        // 6. 【铁板一块】不等任何定时器，不需要任何延迟，在同一步骤内立刻将这个绝对数字永久写死给大框！
-        // 页面高度直接一步到位变成最新值，由于从来没有经历过从 'auto' 到数字的弹性松绑，浏览器绝对找不到任何跳动的空隙
-        searchableArea.style.height = perfectFinalHeight + 'px';
-        searchableArea.style.overflow = 'hidden'; 
-    });
-});
-
-// 体验优化补充：当用户在右上角输入新词触发我们之前的 applyAllHighlights 搜索高亮时
-// 因为系统自动帮你把折叠框拔开了，网页总高度会发生巨变，此时必须同步更新一次这个永久数字！
-// 请把下面这两行代码，直接粘贴到你的 applyAllHighlights() 函数内大循环结束后的最底部：
-/*
-const searchableArea = document.getElementById('searchableArea');
-searchableArea.style.height = 'auto'; // 先释放让其算新高
-searchableArea.style.height = searchableArea.offsetHeight + 'px'; // 立刻再次焊死
-*/
-
-
+      
     </script>
