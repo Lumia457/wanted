@@ -1,5 +1,5 @@
-<nav class="sidebar content-area" id="searchableArea">
-
+<nav class="sidebar content-area" id="searchableArea">    <!-- 引入无感知的落花背景画布 -->    <canvas id="blossom-canvas">
+    
 <!-- 搜索控制栏 -->
 <div class="search-fixed-bar">
     <input type="text" id="combinedSearchInput" placeholder="输入关键字搜索...支持回车键" autocomplete="off">
@@ -245,7 +245,7 @@
 </details>
 
     
-</nav>
+</canvas></nav>
 
 <style>
   
@@ -494,4 +494,102 @@ html, body {
                 scrollToNext();
             }
         });
+
+		
+// ==================== 🌸 高性能粉红风起落花系统 🌸 ====================
+(function() {
+    const canvas = document.getElementById('blossom-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    // 让画布尺寸动态精准匹配浏览器窗口大小
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // 花瓣粒子数组
+    const petals = [];
+    const maxPetals = 45; // 全屏同时存在的最多花瓣数量，数量适中才更典雅
+
+    // 定义花瓣类
+    class Petal {
+        constructor() {
+            this.reset();
+            // 初始随机在屏幕上方或左侧，产生“风吹进来”的感觉
+            this.y = Math.random() * canvas.height - canvas.height;
+            this.x = Math.random() * canvas.width;
+        }
+
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = -20;
+            this.size = Math.random() * 8 + 6;     // 花瓣基准大小（6px 到 14px）
+            this.speedY = Math.random() * 1.2 + 0.8; // 下落速度
+            this.speedX = Math.random() * 1.5 + 1.2; // 向右横移的风速（营造风起效果）
+            this.opacity = Math.random() * 0.4 + 0.5; // 透明度，让落花有远近错落感
+            this.flip = Math.random();               // 翻转初始值
+            this.flipSpeed = Math.random() * 0.03 + 0.01; // 花瓣在风中翻滚自旋的速度
+        }
+
+        update() {
+            this.y += this.speedY;
+            this.x += this.speedX;
+            this.flip += this.flipSpeed;
+
+            // 边缘检测：如果花瓣落出屏幕底部或右侧，则在左侧或上方重置，实现无限循环
+            if (this.y > canvas.height || this.x > canvas.width + 20) {
+                this.reset();
+                // 让重置后的花瓣从左边或顶部重新刮进来
+                if (Math.random() > 0.5) {
+                    this.x = -20;
+                    this.y = Math.random() * canvas.height * 0.5;
+                }
+            }
+        }
+
+        draw() {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.flip); // 赋予花瓣风中旋转的灵魂
+            ctx.opacity = this.opacity;
+
+            // 绘制一片典雅的粉红色花瓣（通过贝塞尔曲线勾勒出优美的花瓣弧度）
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(-this.size, -this.size / 2, -this.size, this.size, 0, this.size * 1.2);
+            ctx.bezierCurveTo(this.size, this.size, this.size, -this.size / 2, 0, 0);
+            
+            // 典雅的樱粉色填充（低饱和度，融合半透明，与绿色完美搭配）
+            ctx.fillStyle = `rgba(255, 182, 193, ${this.opacity})`; 
+            ctx.fill();
+            
+            ctx.restore();
+        }
+    }
+
+    // 初始化花瓣池
+    for (let i = 0; i < maxPetals; i++) {
+        petals.push(new Petal());
+    }
+
+    // 每一帧的动画渲染循环
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // 清空上一帧
+        
+        petals.forEach(petal => {
+            petal.update();
+            petal.draw();
+        });
+        
+        requestAnimationFrame(animate);
+    }
+    
+    // 启动落花系统
+    requestAnimationFrame(animate);
+})();
+// =====================================================================
+
     </script>
