@@ -251,30 +251,6 @@ html, body {
     padding: 40px 0; /* 上下留出精致的内边距，左右设为 0 */
 }
 
-/* 2. 【核心新增】内容区内部的所有直接子元素：统一限制在 600px 黄金宽度内 */
-.content-area > h1,
-.content-area > h2,
-.content-area > h3,
-.content-area > p,
-.content-area > details {
-    width: 100%;
-    max-width: 600px; /* 核心：在这里将内容限制在你要求的 600px */
-    box-sizing: border-box; /* 防止 padding 撑破 600px */
-}
-
-/* 3. 针对多重嵌套的 details 内部微调：确保里层的折叠框撑满它能用的空间 */
-.content-area details details {
-    width: auto; /* 让嵌套在内部的子折叠框自适应缩进，不要强行死锁 600px */
-    max-width: 100%;
-}
-
-/* 4. 如果段落文字在缩到 600px 后在手机上太贴边，可以加个安全的左右小间距 */
-@media (max-width: 640px) {
-    .content-area > h1, .content-area > h2, .content-area > p, .content-area > details {
-        padding-left: 20px;
-        padding-right: 20px;
-    }
-}
 
 </style>
 
