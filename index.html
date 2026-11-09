@@ -251,7 +251,21 @@ html, body {
     padding: 40px 0; /* 上下留出精致的内边距，左右设为 0 */
 }
 
+/* 确保 details 标签在被 JS 锁死高度、内容隐藏时，溢出的空白部分不要显示出来 */
+details {
+    overflow: hidden; 
+}
 
+/* 仅对内部的内容开启渐变，外层大框由于被 JS 焊死了高度，会稳如泰山地立在原位 */
+details::details-content {
+    transition: opacity 0.2s ease-out;
+    opacity: 0;
+}
+details[open]::details-content {
+    opacity: 1;
+}
+
+    
 </style>
 
     <meta charset="UTF-8">
@@ -371,7 +385,7 @@ html, body {
         });
 
 
-// 终极锁死脚本：利用影子高度完美解决多重嵌套收起乱跳
+// 终极防塌陷技术：收起时死死固定物理空间，绝不让页面往上吸
 document.querySelectorAll('details summary').forEach(summary => {
     summary.addEventListener('click', function(e) {
         // 1. 核心：切断事件冒泡，里层折叠绝对不会误伤外层
@@ -379,31 +393,33 @@ document.querySelectorAll('details summary').forEach(summary => {
         
         const details = this.parentElement;
 
-        // 2. 只有当准备【收起】（当前是 open 状态）时，启动影子高度锁死
+        // 2. 只有当准备【收起】（当前是 open 状态，即将被关闭）时，锁定空间
         if (details.hasAttribute('open')) {
-            // 阻止原生的粗暴瞬间隐藏，由我们接管
+            // 阻止浏览器的原生瞬间塌陷行为，由我们接管
             e.preventDefault(); 
 
-            // 3. 抓取当前整个内容区域的绝对物理高度
-            const searchableArea = document.getElementById('searchableArea');
-            const currentTotalHeight = searchableArea.offsetHeight;
+            // 3. 瞬间测出当前这个折叠框在“完全展开”状态下的精确物理高度（包含所有子内容）
+            const fullHeight = details.offsetHeight;
 
-            // 4. 将内容区的总高度强制用写死，变成一块“钢板”，无论里面怎么变，网页总高度都不变
-            searchableArea.style.height = currentTotalHeight + 'px';
-            searchableArea.style.overflow = 'hidden';
+            // 4. 把这个高度直接“焊死”在这个标签的 style 样式上
+            // 这样无论里面的文字怎么隐藏，这个标签在网页里依然占用这么大的空地
+            details.style.height = fullHeight + 'px';
 
-            // 5. 优雅地移除 open 属性，让内部的 CSS 动画平滑收起
+            // 5. 悄悄移除 open 属性（内部的内容此时会被正常隐藏，由于我们写死了高度，下方内容绝对不会自动顶上来）
             details.removeAttribute('open');
-
-            // 6. 等待 200 毫秒（对应 CSS 动画的 0.2s），等它在“钢板”内部完全收好后
-            setTimeout(() => {
-                // 7. 悄悄解开高度锁死，恢复自适应，此时内容已经收好，绝对不会产生任何视口跳动
-                searchableArea.style.height = 'auto';
-                searchableArea.style.overflow = 'visible';
-            }, 200); 
+        } 
+        // 6. 如果用户点击是为了【展开】（把它重新打开）
+        else {
+            // 恢复自适应高度，让内容能够正常撑开显示
+            details.style.height = 'auto';
         }
     });
 });
+
+// 体验优化补充：当用户在右上角输入新词触发我们之前的 applyAllHighlights 搜索高亮时
+// 如果系统自动帮你把折叠框拔开了，也需要确保高度恢复自适应，在搜索框 input 事件的最开头加上这一行即可：
+// document.querySelectorAll('details').forEach(d => d.style.height = 'auto');
+
 
 
 </script>
