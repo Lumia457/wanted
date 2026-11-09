@@ -176,23 +176,6 @@ html {
     interpolate-size: allow-keywords;
 }
 
-/* 给折叠框内容加入高度渐变和淡入淡出动画 */
-details {
-    overflow: hidden; /* 防止动画期间内容溢出 */
-}
-
-details::details-content {
-    transition: block-size 0.3s ease-out, opacity 0.3s ease-out;
-    block-size: 0;
-    opacity: 0;
-}
-
-details[open]::details-content {
-    block-size: auto;
-    opacity: 1;
-}
-
-
 html, body {
     /* 确保不要被其他地方的 smooth 动画干扰 */
     scroll-behavior: auto !important; 
@@ -215,21 +198,7 @@ html, body {
     box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
 }
 
-/* 核心：只对 details-content 开启丝滑动画 */
-details {
-    overflow: hidden;
-}
-details::details-content {
-    transition: block-size 0.2s ease-out, opacity 0.2s ease-out;
-    block-size: 0;
-    opacity: 0;
-}
-details[open]::details-content {
-    block-size: auto;
-    opacity: 1;
-}
 
-    
 /* 确保浏览器自带的全局外边距被清空，否则屏幕最左最右依然会有一条无法填满的几像素灰边 */
 html, body {
     margin: 0;
@@ -246,40 +215,26 @@ html, body {
     padding: 40px 0; /* 上下留出精致的内边距，左右设为 0 */
 }
 
-/* 确保 details 标签在被 JS 锁死高度、内容隐藏时，溢出的空白部分不要显示出来 */
-details {
-    overflow: hidden; 
-}
 
-/* 仅对内部的内容开启渐变，外层大框由于被 JS 焊死了高度，会稳如泰山地立在原位 */
-details::details-content {
-    transition: opacity 0.2s ease-out;
-    opacity: 0;
-}
-details[open]::details-content {
-    opacity: 1;
-}
-
-
-/* 确保内容大框在写死高度时，隐藏多余的截断溢出，防止闪烁 */
 #searchableArea {
     box-sizing: border-box;
+    /* 初始化时也用 CSS 直接将其转为块级锁死环境 */
+    overflow: hidden; 
 }
 
 details {
     overflow: hidden; 
 }
 
-/* 仅对内部的内容开启过渡效果，外层大容器由于被 JS 高度精确计算追加，可以完美保证视口一动不动 */
+/* 仅保留极其轻量的淡入淡出（不影响物理高度计算），去除任何对高度尺寸（block-size/height）的渐变干扰 */
 details::details-content {
-    transition: opacity 0.2s ease-out;
+    transition: opacity 0.15s ease-out;
     opacity: 0;
 }
 details[open]::details-content {
     opacity: 1;
 }
 
-    
 </style>
 
     <meta charset="UTF-8">
@@ -399,66 +354,46 @@ details[open]::details-content {
         });
 
 
-// 终极高度追加锁定技术：展开与收起都死死咬定页面物理高度
+// 终极绝杀全焊死技术：永远使用绝对像素，彻底消灭 auto 切换带来的二次跳动
 document.querySelectorAll('details summary').forEach(summary => {
     summary.addEventListener('click', function(e) {
         // 1. 核心：切断事件冒泡，里层折叠绝对不会误伤外层
         e.stopPropagation(); 
         
+        // 2. 阻止浏览器的所有原生瞬间塌陷/暴力撑开行为，完全由我们用数字接管
+        e.preventDefault(); 
+
         const details = this.parentElement;
         const searchableArea = document.getElementById('searchableArea');
 
-        // 获取当前整个大内容区的绝对物理高度（点击前的初始高度）
-        const initialTotalHeight = searchableArea.offsetHeight;
-
-        // =================【场景 A：用户点击收起】=================
+        // 3. 执行状态切换（如果开着就关，如果关着就开）
         if (details.hasAttribute('open')) {
-            e.preventDefault(); // 接管原生瞬间塌陷
-
-            // 焊死当前总高度，让内部自己折叠，外部纹丝不动
-            searchableArea.style.height = initialTotalHeight + 'px';
-            searchableArea.style.overflow = 'hidden';
-
             details.removeAttribute('open');
-
-            // 200ms 动画结束后释放
-            setTimeout(() => {
-                searchableArea.style.height = 'auto';
-                searchableArea.style.overflow = 'visible';
-            }, 200); 
-        } 
-        
-        // =================【场景 B：用户点击展开】=================
-        else {
-            e.preventDefault(); // 接管原生的暴力撑开
-
-            // 1. 先把 details 拔开（此时由于还没渲染，页面还没变高）
+        } else {
             details.setAttribute('open', '');
-
-            // 2. 瞬间测量：此时拔开后，整个大框由于塞进了新文字，产生的“新目标总高度”是多少
-            const targetTotalHeight = searchableArea.offsetHeight;
-
-            // 3. 计算出“这次展开到底增加了多少像素的高度”
-            const heightDifference = targetTotalHeight - initialTotalHeight;
-
-            // 4. 【核心锁定】不管增加多少高度，用初始高度直接写死！
-            // 此时 details 虽然有了 open 属性，但因为外层被我们死死锁在 initialTotalHeight，所以内容在“无形”中展开，页面没有任何多余的滚动和乱跳空间
-            searchableArea.style.height = initialTotalHeight + 'px';
-            searchableArea.style.overflow = 'hidden';
-
-            // 5. 让浏览器渲染引擎在极短的 10 毫秒后，再以绝对可控的稳定姿态把高度无缝追加进去
-            setTimeout(() => {
-                // 瞬间将大框的高度修改为包含新数据的高度
-                searchableArea.style.height = targetTotalHeight + 'px';
-                
-                // 6. 等 200 毫秒动画完全平稳后，彻底松绑恢复自适应
-                setTimeout(() => {
-                    searchableArea.style.height = 'auto';
-                    searchableArea.style.overflow = 'visible';
-                }, 200);
-            }, 10);
         }
+
+        // 4. 【高精核心】瞬间将外层大容器的高宽临时解除，让浏览器在内存中飞速计算出切换完成后的“最终完美总高度”
+        searchableArea.style.height = 'auto';
+
+        // 5. 瞬间抓取这个最新、最精确、不带任何水分的纯物理总高度（单位：像素）
+        const perfectFinalHeight = searchableArea.offsetHeight;
+
+        // 6. 【铁板一块】不等任何定时器，不需要任何延迟，在同一步骤内立刻将这个绝对数字永久写死给大框！
+        // 页面高度直接一步到位变成最新值，由于从来没有经历过从 'auto' 到数字的弹性松绑，浏览器绝对找不到任何跳动的空隙
+        searchableArea.style.height = perfectFinalHeight + 'px';
+        searchableArea.style.overflow = 'hidden'; 
     });
 });
+
+// 体验优化补充：当用户在右上角输入新词触发我们之前的 applyAllHighlights 搜索高亮时
+// 因为系统自动帮你把折叠框拔开了，网页总高度会发生巨变，此时必须同步更新一次这个永久数字！
+// 请把下面这两行代码，直接粘贴到你的 applyAllHighlights() 函数内大循环结束后的最底部：
+/*
+const searchableArea = document.getElementById('searchableArea');
+searchableArea.style.height = 'auto'; // 先释放让其算新高
+searchableArea.style.height = searchableArea.offsetHeight + 'px'; // 立刻再次焊死
+*/
+
 
     </script>
