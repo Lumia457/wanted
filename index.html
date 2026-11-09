@@ -1,4 +1,10 @@
 <nav class="sidebar content-area" id="searchableArea">
+
+<!-- 搜索控制栏 -->
+<div class="search-fixed-bar">
+    <input type="text" id="combinedSearchInput" placeholder="输入关键字搜索..." autocomplete="off">
+    <button id="nextSearchBtn">查找下一个</button>
+</div>
   
 <details><summary>HOOKSOFT</summary>
   
@@ -14,7 +20,7 @@
   
 </details>
 
-  <details><summary>SMEE</summary>
+<details><summary>SMEE</summary>
   
   <ul><details><summary>Strawberry Nauts -ストロベリーノーツ-</summary><ul>
     <p>Strawberry Nauts ストロベリーノートPDF （购买 Strawberry Nauts-ストロベリーノーツ- Full HD Memorial Plus 初回版 附赠，ゲームディスク同梱，要原装PDF）【10 hb】 </p>
@@ -35,11 +41,11 @@
 .sidebar {
   width: 1860px;
   border: 1px solid #eee;
-  padding: 10px;
+  : 10px;
 }
   
 .sidebar summary {
-  padding: 8px 10px;
+  : 8px 10px;
   transition: 0.3s; /* 让变化有一个丝滑的过渡效果 */
 }
   
@@ -78,7 +84,7 @@ p:hover {
 
         /* 固定的搜索工具栏 */
         .search-fixed-bar {
-            position: fixed;
+            position: sticky;
             top: 0px;
             left: 20px;
             background: white;
@@ -87,13 +93,15 @@ p:hover {
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             display: flex;
             align-items: center;
+            justify-content: center; /* 让搜索框在正中间 */
             gap: 10px;
+            border-bottom: 2px solid #3b82f6; /* 给底部加一条优雅的蓝线 */
             z-index: 9999;
             border: 2px solid #3b82f6;
         }
 
         .search-fixed-bar input {
-            padding: 8px 16px;
+            : 8px 16px;
             border: none;
             font-size: 14px;
             outline: none;
@@ -101,7 +109,7 @@ p:hover {
         }
 
         .search-fixed-bar button {
-            padding: 8px 16px;
+            : 8px 16px;
             background-color: #3b82f6;
             color: white;
             border: none;
@@ -122,7 +130,7 @@ p:hover {
             max-width: 1900px;
             margin: 40px auto -20px auto;
             background: white;
-            padding: 10px;
+            : 10px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
@@ -130,7 +138,7 @@ p:hover {
         /* 美化原生的 details 标签并加上层级缩进 */
         details {
             background: #f8fafc;
-            padding: 12px;
+            : 12px;
             margin: 10px 0;
             border-radius: 6px;
             border: 1px solid #e2e8f0;
@@ -148,14 +156,8 @@ p:hover {
 </style>
 
     <meta charset="UTF-8">
-    <title>全量高亮与滚动定位搜索框</title>
+    <title>长期求物（可搜索）</title>
     
-    <!-- 搜索控制栏 -->
-    <div class="search-fixed-bar">
-        <input type="text" id="combinedSearchInput" placeholder="输入关键字搜索..." autocomplete="off">
-        <button id="nextSearchBtn">查找下一个</button>
-    </div>
-
     <!-- 核心穿透逻辑 JavaScript -->
     <script>
         const searchInput = document.getElementById('combinedSearchInput');
