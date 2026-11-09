@@ -309,22 +309,27 @@ details[open]::details-content {
             }
         });
 
-// 终极防跑偏：完美平滑折叠组件
+// 终极防跑偏 + 防事件冒泡（解决多重嵌套联动关闭问题）
 document.querySelectorAll('details').forEach(details => {
     details.addEventListener('click', function(e) {
+        
+        // 核心修改：【阻止事件冒泡】
+        // 确保点击里层的折叠框时，事件绝对不会传给外层的折叠框
+        e.stopPropagation(); 
+
         // 我们只处理“收起（从打开变关闭）”的动作
         if (this.hasAttribute('open')) {
-            // 1. 阻止原生的瞬间关闭行为，改用我们的动画处理
+            // 阻止原生的瞬间关闭行为，改用我们的动画处理
             e.preventDefault(); 
             
-            // 2. 记录点击瞬间，该折叠框距离屏幕顶部的相对距离（绝对视觉锚点）
+            // 记录点击瞬间，当前点击的这个折叠框距离屏幕顶部的相对距离
             const rect = this.getBoundingClientRect();
             const offsetFromViewportTop = rect.top;
 
-            // 3. 移除 open 属性触发 CSS 退场动画
+            // 移除 open 属性触发 CSS 退场动画
             this.removeAttribute('open');
 
-            // 4. 在动画进行的 300 毫秒内，高频将该标签锁死在用户眼前的相对位置
+            // 在动画进行的 300 毫秒内，高频将该标签锁死在用户眼前的相对位置
             const animationDuration = 300; 
             const startTime = performance.now();
 
@@ -349,5 +354,6 @@ document.querySelectorAll('details').forEach(details => {
         }
     });
 });
+
 
 </script>
