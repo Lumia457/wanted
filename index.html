@@ -169,6 +169,7 @@ p:hover {
             cursor: pointer;
             outline: none;
         }
+
     
 /* 开启现代浏览器的尺寸渐变插值（关键：允许从 auto 高度平滑过渡） */
 html {
@@ -191,23 +192,35 @@ details[open]::details-content {
     opacity: 1;
 }
 
+
 html, body {
-    /* 核心 1：关闭全局的平滑滚动动画，防止滚动条在折叠时产生位移惯性 */
+    /* 确保不要被其他地方的 smooth 动画干扰 */
     scroll-behavior: auto !important; 
 }
 
-.content-area {
-    /* 核心 2：开启浏览器底层的【滚动锚定】机制 */
-    /* 当内部的标签（如 details）变长或变短时，浏览器会自动调整滚动条，强行让用户眼前的画面保持绝对静止 */
-    overflow-anchor: auto; 
+/* 搜索框吸顶样式保持原样 */
+.search-fixed-bar {
+    position: sticky;
+    top: 0;
+    z-index: 9999; 
+    background: white; 
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 2px solid #3b82f6;
+    border-radius: 25px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
 }
 
-/* 保持丝滑的折叠动画，但去掉复杂的 JS 干扰 */
+/* 核心：只对 details-content 开启丝滑动画 */
 details {
     overflow: hidden;
 }
 details::details-content {
-    transition: block-size 0.25s ease-out, opacity 0.25s ease-out;
+    transition: block-size 0.2s ease-out, opacity 0.2s ease-out;
     block-size: 0;
     opacity: 0;
 }
@@ -335,17 +348,39 @@ details[open]::details-content {
         });
 
 
-// 极简穿透与防冒泡脚本（将滚动控制完全交还给浏览器原生底层）
+// 终极锁死脚本：利用影子高度完美解决多重嵌套收起乱跳
 document.querySelectorAll('details summary').forEach(summary => {
     summary.addEventListener('click', function(e) {
-        // 1. 核心：切断事件冒泡，里层折叠绝对不会影响外层
+        // 1. 核心：切断事件冒泡，里层折叠绝对不会误伤外层
         e.stopPropagation(); 
         
-        // 2. 允许浏览器的默认折叠行为发生，让 CSS 动画正常运行
-        // 此时由于外层配置了 overflow-anchor: auto，浏览器会自动接管高度塌陷，在万分之一秒内焊死视口，绝不乱跳
+        const details = this.parentElement;
+
+        // 2. 只有当准备【收起】（当前是 open 状态）时，启动影子高度锁死
+        if (details.hasAttribute('open')) {
+            // 阻止原生的粗暴瞬间隐藏，由我们接管
+            e.preventDefault(); 
+
+            // 3. 抓取当前整个内容区域的绝对物理高度
+            const searchableArea = document.getElementById('searchableArea');
+            const currentTotalHeight = searchableArea.offsetHeight;
+
+            // 4. 将内容区的总高度强制用写死，变成一块“钢板”，无论里面怎么变，网页总高度都不变
+            searchableArea.style.height = currentTotalHeight + 'px';
+            searchableArea.style.overflow = 'hidden';
+
+            // 5. 优雅地移除 open 属性，让内部的 CSS 动画平滑收起
+            details.removeAttribute('open');
+
+            // 6. 等待 200 毫秒（对应 CSS 动画的 0.2s），等它在“钢板”内部完全收好后
+            setTimeout(() => {
+                // 7. 悄悄解开高度锁死，恢复自适应，此时内容已经收好，绝对不会产生任何视口跳动
+                searchableArea.style.height = 'auto';
+                searchableArea.style.overflow = 'visible';
+            }, 200); 
+        }
     });
 });
-
 
 
 </script>
