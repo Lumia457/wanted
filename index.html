@@ -263,8 +263,28 @@
 	
 </nav>
 
+
+
+
+
+
+
+
+
+
+
+
+
 	
 
+
+
+
+
+
+
+
+	
 
 
 
@@ -384,6 +404,35 @@
 		}
 	});
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+	
 	// ==================== 🌸 高性能粉红风起落花系统 🌸 ====================
 	(function() {
 	    const canvas = document.getElementById('blossom-canvas');
@@ -405,67 +454,61 @@
 		// --- 核心 C 改良版：高性能粉红樱花与随机绿叶粒子系统 ---
 		class Petal {
 			constructor() {
-				this.reset();
-				// 初始随机散落全屏
-				this.y = Math.random() * canvas.height;
-				this.x = Math.random() * canvas.width;
+                    // ✨【核心修改】初始化时不再散落全屏，而是直接调用 reset，
+                    // 强迫网页在刚打开的一瞬间，所有花叶也必须统一从屏幕最上方降临
+                    this.reset();
+                    // 给予第一次降临一个略微错落的初始 y 轴微调（在顶部 -50px 到 0px 之间），防止排成一排
+                    this.y = Math.random() * -50; 
 			}
 			
 			reset() {
-				this.x = Math.random() * canvas.width;
-				this.y = -20;
-				this.size = Math.random() * 8 + 6;     // 粒子大小
-				this.speedY = Math.random() * 1.2 + 0.8; // 下落速度
-				this.speedX = Math.random() * 1.5 + 1.2; // 横向风速
-				this.opacity = Math.random() * 0.4 + 0.5; // 透明度
-				this.flip = Math.random();               // 翻转角度
-				this.flipSpeed = Math.random() * 0.03 + 0.01; // 自旋速度
-	
-				// ✨【核心新增：随机生成绿叶】
-				// 约有 50% 的概率产生新绿色嫩叶，50% 保持粉红樱花
-				this.isLeaf = Math.random() < 0.5; 
-				
-				if (this.isLeaf) {
-					// 典雅的莫兰迪新绿色（带有半透明）
-					this.color = `rgba(143, 188, 143, ${this.opacity})`; 
-				} else {
-					// 原本浪漫的樱粉色
-					this.color = `rgba(255, 182, 193, ${this.opacity})`; 
-				}
+                    // ✨【核心修改】所有出界的花叶，统一将 X 轴（横向）分布在屏幕上边缘
+                    this.x = Math.random() * canvas.width;
+                    
+                    // ✨【核心修改】所有出界的花叶，Y 轴（纵向）死死固定在屏幕最上方的视口之外（-20px）
+                    // 这样它们在重新生成时，绝对必须从最顶部飘进用户的视线，再也不会在屏幕中间凭空冒出
+                    this.y = -20; 
+
+                    this.size = Math.random() * 8 + 6;     // 粒子大小
+                    this.speedY = Math.random() * 1.2 + 0.8; // 下落速度
+                    this.speedX = Math.random() * 1.5 + 1.2; // 向右横移的风速
+                    this.opacity = Math.random() * 0.4 + 0.5; // 不透明度
+                    this.flip = Math.random();               // 旋转初始值
+                    this.flipSpeed = Math.random() * 0.03 + 0.01; // 自旋速度
+
+                    // 随机分配花或叶
+                    this.isLeaf = Math.random() < 0.3; 
+                    if (this.isLeaf) {
+                        this.color = `rgba(143, 188, 143, ${this.opacity})`; // 鼠尾草绿
+                    } else {
+                        this.color = `rgba(255, 182, 193, ${this.opacity})`; // 樱粉色
+                    }
 			}
 	
 			update() {
-				this.y += this.speedY;
-				this.x += this.speedX;
-				this.flip += this.flipSpeed;
-				
-				// 出界检测并循环
-				if (this.y > canvas.height || this.x > canvas.width + 20) {
-					this.reset();
-					if (Math.random() > 0.5) {
-						this.x = -20;
-						this.y = Math.random() * canvas.height * 0.5;
-					}
-				}
+                    this.y += this.speedY;
+                    this.x += this.speedX;
+                    this.flip += this.flipSpeed;
+                    
+                    // ✨【核心修改】出界判定简化：
+                    // 当花叶完全落出屏幕底部（y > canvas.height）或者往右飘出了屏幕右侧（x > canvas.width + 20）
+                    // 统一调用上面的 reset()，让它们全部转世回到最顶端重新开始下落
+                    if (this.y > canvas.height || this.x > canvas.width + 20) {
+                        this.reset();
+                    }
 			}
 	
 			draw() {
-				ctx.save();
-				ctx.translate(this.x, this.y);
-				ctx.rotate(this.flip);
-				
-				ctx.beginPath();
-				ctx.moveTo(0, 0);
-	
-				// 🌿 绘制一片优雅的植物叶子/花瓣弧度
-				ctx.bezierCurveTo(-this.size, -this.size / 2, -this.size, this.size, 0, this.size * 1.2);
-				ctx.bezierCurveTo(this.size, this.size, this.size, -this.size / 2, 0, 0);
-				
-				// 动态应用随机分配好的粉红或嫩绿颜色
-				ctx.fillStyle = this.color; 
-				ctx.fill();
-				
-				ctx.restore();
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.flip);
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.bezierCurveTo(-this.size, -this.size / 2, -this.size, this.size, 0, this.size * 1.2);
+                    ctx.bezierCurveTo(this.size, this.size, this.size, -this.size / 2, 0, 0);
+                    ctx.fillStyle = this.color; 
+                    ctx.fill();
+                    ctx.restore();
 			}
 		}
 	
@@ -501,6 +544,9 @@
 
 
 </body>
+
+
+
 
 
 
@@ -577,6 +623,15 @@ p:hover {
   text-decoration: none;
 }
 
+
+
+
+
+
+
+
+
+	
         body {
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             padding: 0px;
@@ -656,6 +711,15 @@ p:hover {
             outline: none;
         }
 
+
+
+
+
+
+
+
+
+	
 html, body {
   margin: 0;
   padding: 0;
